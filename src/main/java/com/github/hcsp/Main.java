@@ -14,7 +14,6 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class Main {
   public static void main(String[] args) throws IOException {
@@ -27,17 +26,17 @@ public class Main {
     linkPool.add("http://sina.cn");
 
     while (true){
-      if(linkPool.isEmpty()){
+      if (linkPool.isEmpty()){
           //池子空就跳出
           break;
         }
       String link =  linkPool.remove(linkPool.size()-1);
       //每次从池中拿一个链接,从尾部拿并删除更有效率(先拿后删) arraylist d的remove方法返回删除的元素（先删后拿）
-      if(processedLink.contains(link)){
+      if (processedLink.contains(link)){
         //判断这个链接是否处理过，如果已经处理继续下一步
           continue;
       }
-      if(isInterestingLink(link)){
+      if (isInterestingLink(link)){
         Document doc = httpGetAndParseHtml(link);
         doc.select("a").stream().map(aTage -> aTage.attr("href")).forEach(linkPool::add);
         storeIntoDatabaseIfItIsNewsPage(doc);
@@ -56,7 +55,7 @@ public class Main {
   private static void storeIntoDatabaseIfItIsNewsPage(Document doc) {
     ArrayList<Element> articleTags = doc.select("article");
     //假如这是一个新闻的页面的详情页面，就存入数据库，否则什么都不做
-    if(!articleTags.isEmpty()){
+    if (!articleTags.isEmpty()){
       for (Element articleTag : articleTags) {
         String title = articleTags.get(0).child(0).text();
         System.out.println(title);
@@ -73,7 +72,7 @@ public class Main {
       System.out.println(link);
     }
     HttpGet httpGet = new HttpGet(link);
-    httpGet.addHeader("user-agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
+    httpGet.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
 
     try (CloseableHttpResponse response1 = httpclient.execute(httpGet)) {
       System.out.println(response1.getStatusLine());
