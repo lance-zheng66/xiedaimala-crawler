@@ -67,7 +67,7 @@ public class Main {
     //这是我们感兴趣的，我们只处理新浪站内的链接
     CloseableHttpClient httpclient = HttpClients.createDefault();
     System.out.println(link);
-    if(link.startsWith("//")){
+    if (link.startsWith("//")){
       link="https:"+link;
       System.out.println(link);
     }
