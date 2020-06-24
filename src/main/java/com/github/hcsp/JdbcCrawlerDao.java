@@ -1,5 +1,6 @@
 package com.github.hcsp;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,12 +9,16 @@ import java.sql.SQLException;
 
 public class JdbcCrawlerDao implements CrawlerDao {
 
+  private static final String USER_NAME="root";
+  private static final String PASSWORD ="root";
+
   private final Connection connection;
 
+  @SuppressFBWarnings("DMI_CONSTANT_DB_PASSWORD")
   public JdbcCrawlerDao() {
     try {
       this.connection = DriverManager
-          .getConnection("jdbc:h2:file:D:/maven-projects/xiedaimala-crawler/news");
+          .getConnection("jdbc:h2:file:D:/maven-projects/xiedaimala-crawler/news", USER_NAME, PASSWORD);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
