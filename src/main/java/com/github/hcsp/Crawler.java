@@ -17,7 +17,7 @@ import org.jsoup.nodes.Element;
 
 public class Crawler {
 
-  private CrawlerDao dao = new JdbcCrawlerDao();
+  private CrawlerDao dao = new MyBatisCrawlerDao();
 
   public void run() throws SQLException, IOException {
 
@@ -34,7 +34,7 @@ public class Crawler {
         Document doc = httpGetAndParseHtml(link);
         parseUrlFromPageStoreIntoDatabase(doc);
         storeIntoDatabaseIfItIsNewsPage(doc, link);
-        dao.updateDataBase(link, "INSERT INTO LINKS_ALREADY_PROCESSED (link) values (?)");
+        dao.insertProcessedLink(link);
       }
     }
   }
@@ -53,7 +53,7 @@ public class Crawler {
         href = "https:" + href;
       }
       if (!href.toLowerCase().startsWith("javascript")) {
-        dao.updateDataBase(href, "INSERT INTO LINKS_TO_BE_PROCESSED (link) values (?)");
+        dao.insertLinkToBeProcesssed(href);
       }
     }
   }

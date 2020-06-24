@@ -2,9 +2,17 @@ package com.github.hcsp;
 
 public class News {
   private Integer id;
+
+  public News(String url, String content, String title) {
+    this.url = url;
+    this.content = content;
+    this.title = title;
+  }
+
   private String url;
   private String content;
   private String title;
+
 
 
   public Integer getId() {
