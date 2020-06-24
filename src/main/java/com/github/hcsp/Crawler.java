@@ -14,39 +14,38 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+public class Crawler extends Thread {
 
-public class Crawler {
+  private CrawlerDao dao;
 
-  private CrawlerDao dao = new MyBatisCrawlerDao();
+  public Crawler(CrawlerDao dao) {
+    this.dao = dao;
+  }
 
-  public void run() throws SQLException, IOException {
-
-    String link;
-
-    //从数据库中加载下一个连接，如果能加载到，则进行循环
-    while ((link =dao.getNextLinkThenDelete()) != null) {
-      if (dao.isLinkProcessed(link)) {
-        // 判断这个链接是否处理过，如果已经处理继续下一步
-        continue;
+  @Override
+  public void run() {
+    try {
+      String link;
+      // 从数据库中加载下一个连接，如果能加载到，则进行循环
+      while ((link = dao.getNextLinkThenDelete()) != null) {
+        if (dao.isLinkProcessed(link)) {
+          // 判断这个链接是否处理过，如果已经处理继续下一步
+          continue;
+        }
+        if (isInterestingLink(link)) {
+          System.out.println(link);
+          Document doc = httpGetAndParseHtml(link);
+          parseUrlFromPageStoreIntoDatabase(doc);
+          storeIntoDatabaseIfItIsNewsPage(doc, link);
+          dao.insertProcessedLink(link);
+        }
       }
-      if (isInterestingLink(link)) {
-        System.out.println(link);
-        Document doc = httpGetAndParseHtml(link);
-        parseUrlFromPageStoreIntoDatabase(doc);
-        storeIntoDatabaseIfItIsNewsPage(doc, link);
-        dao.insertProcessedLink(link);
-      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
-
-  public static void main(String[] args) throws IOException, SQLException {
-    new Crawler().run();
-
-  }
-
-  private void parseUrlFromPageStoreIntoDatabase(Document doc)
-      throws SQLException {
+  private void parseUrlFromPageStoreIntoDatabase(Document doc) throws SQLException {
     for (Element aTage : doc.select("a")) {
       String href = aTage.attr("href");
       if (href.startsWith("//")) {
@@ -58,17 +57,13 @@ public class Crawler {
     }
   }
 
-
-
-
-
   private void storeIntoDatabaseIfItIsNewsPage(Document doc, String link) throws SQLException {
     ArrayList<Element> articleTags = doc.select("article");
     if (!articleTags.isEmpty()) {
       for (Element articleTag : articleTags) {
         String title = articleTags.get(0).child(0).text();
-        String content = articleTag.select("p").stream().map(Element::text)
-            .collect(Collectors.joining("\n"));
+        String content =
+            articleTag.select("p").stream().map(Element::text).collect(Collectors.joining("\n"));
         dao.insertNewsIntoDatabase(link, title, content);
       }
     }
@@ -109,6 +104,3 @@ public class Crawler {
     return (!link.contains("passport.sina.cn"));
   }
 }
-
-
-
