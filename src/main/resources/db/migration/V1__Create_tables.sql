@@ -3,7 +3,7 @@ id bigint primary key auto_increment,
 title text,
 content text,
 url varchar (1000),
-create_at timestamp default now(),
+created_at timestamp default now(),
 modified_at timestamp default now()
 ) DEFAULT CHARSET=utf8mb4;
 
